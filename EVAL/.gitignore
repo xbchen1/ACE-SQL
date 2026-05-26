@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+outputs/
+data/
+models/
+*.out
+*.err
+*.log
+*.sqlite
+*.db
+*.pkl

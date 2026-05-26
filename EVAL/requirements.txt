@@ -1,0 +1,11 @@
+torch
+transformers
+peft
+vllm
+tqdm
+nltk
+pyserini
+ijson
+func_timeout
+sqlglot
+gdown

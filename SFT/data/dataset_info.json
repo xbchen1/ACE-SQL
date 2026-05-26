@@ -1,0 +1,10 @@
+{
+  "domain1_sft_think": {
+    "file_name": "domain1_alpaca_think.json",
+    "formatting": "alpaca"
+  },
+  "domain2_sft_think": {
+    "file_name": "domain2_alpaca_think.json",
+    "formatting": "alpaca"
+  }
+}

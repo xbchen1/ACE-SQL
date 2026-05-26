@@ -1,0 +1,42 @@
+{
+  "adjusted_original_count_distribution": {
+    "1": 48,
+    "15": 90,
+    "16": 112
+  },
+  "candidate_rows_after_excluding_current_and_val": 1362,
+  "pool_entries_adjusted_to_random_2_14": 250,
+  "pool_keys_after": 2953,
+  "rows_added": 256,
+  "rows_after": 2913,
+  "rows_before": 2657,
+  "seed": 20260525,
+  "selected_final_correct_count_distribution": {
+    "2": 15,
+    "3": 23,
+    "4": 16,
+    "5": 9,
+    "6": 28,
+    "7": 16,
+    "8": 14,
+    "9": 14,
+    "10": 28,
+    "11": 23,
+    "12": 25,
+    "13": 22,
+    "14": 23
+  },
+  "selected_original_correct_count_distribution": {
+    "1": 48,
+    "6": 1,
+    "9": 1,
+    "10": 2,
+    "13": 2,
+    "15": 90,
+    "16": 112
+  },
+  "source_pool": "source_data/initial_pool_filtered.json",
+  "source_train": "source_data/train_filtered.parquet",
+  "target_rows": 2913,
+  "validation_rows_excluded": 40
+}

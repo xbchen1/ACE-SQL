@@ -1,0 +1,20 @@
+.run/
+wandb/
+outputs/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hydra/
+core.*
+
+# Local heavyweight assets are intentionally external to git.
+models/*
+!models/.gitkeep
+external/*
+!external/.gitkeep
+
+# Keep the curated training inputs in git.
+!data/

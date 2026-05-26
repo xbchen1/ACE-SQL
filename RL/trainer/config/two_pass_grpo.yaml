@@ -1,0 +1,311 @@
+# Two-Pass GRPO Joint Training Configuration
+# Retriever + Generator joint optimization using GRPO advantage estimation
+
+defaults:
+
+  - model_engine: dp
+
+  - npu_profile@trainer.npu_profile: npu_profile
+
+  - actor@actor_rollout_ref.actor: ${model_engine}_actor
+
+  - data@data: legacy_data
+
+  - ref@actor_rollout_ref.ref: ${model_engine}_ref
+
+  - rollout@actor_rollout_ref.rollout: rollout
+
+  - model@actor_rollout_ref.model: hf_model
+
+  - critic@critic: ${model_engine}_critic
+
+  - legacy_reward_impl
+
+  - reward@reward: reward
+
+  - algorithm@algorithm.rollout_correction: rollout_correction
+
+  - _self_
+
+# Actor / Rollout / Reference model top-level overrides
+actor_rollout_ref:
+
+  hybrid_engine: true
+
+  nccl_timeout: 600
+
+  rollout:
+    name: vllm
+    layered_summon: False
+
+# Algorithm configuration - GRPO for group-relative policy optimization
+algorithm:
+
+  _target_: verl.trainer.config.AlgoConfig
+
+  gamma: 1.0
+
+  lam: 1.0
+
+  adv_estimator: grpo
+
+  norm_adv_by_std_in_grpo: True
+
+  use_kl_in_reward: False
+
+  kl_penalty: kl
+
+  kl_ctrl:
+
+    _target_: verl.trainer.config.KLControlConfig
+
+    type: fixed
+
+    kl_coef: 0.001
+
+    horizon: 10000
+
+    target_kl: 0.1
+
+  use_pf_ppo: False
+
+  pf_ppo:
+
+    reweight_method: pow
+
+    weight_pow: 2.0
+
+# SERL-like joint training schedule
+# Three-phase schedule (activated when all alpha_start/mid/end + phase1/2_end are set):
+#   Phase 1 [0, phase1_end): alpha ramps from alpha_start → alpha_mid
+#   Phase 2 [phase1_end, phase2_end): alpha stays at alpha_mid (constant)
+#   Phase 3 [phase2_end, 1.0]: alpha ramps from alpha_mid → alpha_end
+#   beta = 1 - alpha throughout
+# Legacy two-phase schedule (used when three-phase params are null):
+#   alpha ramps from alpha_init → alpha_max over alpha_ramp_ratio fraction
+#   beta = max(1 - alpha, beta_min)
+serl:
+
+  # If true, ignore alpha/beta schedules and use loss_scale=1.0 for both tasks.
+  constant_loss_scale: false
+
+  # Loss weight schedule for joint retriever/generator updates.
+  # legacy uses the existing alpha/beta schedule. linear_joint_ramp linearly
+  # interpolates independent retriever/generator weights for the first
+  # loss_weight_ramp_ratio of total steps and then keeps the final weights.
+  loss_weight_schedule: legacy
+
+  # Fraction of total steps used by linear_joint_ramp.
+  loss_weight_ramp_ratio: 0.25
+
+  # Initial retriever loss weight for linear_joint_ramp.
+  retriever_loss_weight_start: 1.0
+
+  # Final retriever loss weight for linear_joint_ramp.
+  retriever_loss_weight_end: 1.0
+
+  # Initial generator loss weight for linear_joint_ramp.
+  generator_loss_weight_start: 0.0
+
+  # Final generator loss weight for linear_joint_ramp.
+  generator_loss_weight_end: 1.0
+
+  # Three-phase params (all must be non-null to activate, otherwise legacy is used)
+  alpha_start: null
+
+  alpha_mid: null
+
+  alpha_end: null
+
+  phase1_end: null
+
+  phase2_end: null
+
+  # Legacy two-phase params
+  alpha_init: 0.05
+
+  alpha_max: 0.5
+
+  beta_min: 0.5
+
+  alpha_ramp_ratio: 1.0
+
+  ret_n: null
+
+  # Optional one-time warmup before the cyclic training_phase_schedule starts.
+  # During these epochs only retriever rollouts are generated and only the
+  # retriever actor/adapter is updated.
+  retriever_only_warmup_epochs: 0
+
+  # Optional retriever group size for retriever-only epochs. Defaults to ret_n.
+  retriever_only_ret_n: null
+
+  gen_max_prompt_length: 4096
+
+  # How generator prompts are built from retriever samples.
+  # merged_union unions all retriever outputs per question, giving all generator
+  # samples in a GRPO group the same environment.
+  # majority_vote keeps columns that appear in at least
+  # ceil(ret_n * generator_prompt_vote_threshold) retriever outputs; it never
+  # falls back to the full schema.
+  # per_retriever is kept only as an ablation mode.
+  generator_prompt_mode: merged_union
+  generator_prompt_vote_threshold: 0.5
+
+  initial_pool_path: null
+
+  # joint: original two-pass joint update.
+  # retriever,generator,...: full-parameter alternating epochs; each listed
+  # phase updates the same actor model with only that phase's loss.
+  training_phase_schedule: joint
+
+  # v6: existing shaped retriever reward.
+  # pool_exact: sparse main-experiment reward; exact match to the highest
+  # frequency pool column set(s) gives pool_exact_reward, otherwise 0.
+  retriever_reward_mode: v6
+
+  pool_exact_reward: 1.0
+
+  # Decay factor for historical empirical pool counts.
+  pool_gamma: 0.5
+
+  # Optional per-role generation caps. The global rollout response_length must
+  # be at least the max of these values because VERL pads rollout tensors to
+  # that global length.
+  retriever_response_length: null
+
+  generator_response_length: null
+
+  debug_print: false
+
+  debug_print_max_samples: 2
+
+  debug_dump_artifacts: false
+
+# Reward model configuration (disabled - using JointRewardManager instead)
+reward_model:
+
+  enable: False
+
+  launch_reward_fn_async: False
+
+# Trainer configuration
+trainer:
+
+  balance_batch: True
+
+  total_epochs: 30
+
+  total_training_steps: null
+
+  project_name: verl_examples
+
+  experiment_name: two_pass_grpo
+
+  logger: ["console", "wandb"]
+
+  log_val_generations: 0
+
+  rollout_data_dir: null
+
+  validation_data_dir: null
+
+  nnodes: 1
+
+  n_gpus_per_node: 8
+
+  save_freq: -1
+
+  esi_redundant_time: 0
+
+  resume_mode: auto
+
+  resume_from_path: null
+
+  val_before_train: True
+
+  val_only: False
+
+  test_freq: -1
+
+  critic_warmup: 0
+
+  default_hdfs_dir: null
+
+  del_local_ckpt_after_load: False
+
+  default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}
+
+  max_actor_ckpt_to_keep: null
+
+  max_critic_ckpt_to_keep: null
+
+  ray_wait_register_center_timeout: 300
+
+  device: cuda
+
+  use_legacy_worker_impl: auto
+
+# Profiler configuration
+global_profiler:
+
+  _target_: verl.utils.profiler.ProfilerConfig
+
+  tool: null
+
+  steps: null
+
+  profile_continuous_steps: False
+
+  save_path: "outputs/profile"
+
+  global_tool_config:
+
+    nsys:
+
+      _target_: verl.utils.profiler.config.NsightToolConfig
+
+      discrete: False
+
+      controller_nsight_options:
+        trace: "cuda,nvtx,cublas,ucx"
+        cuda-memory-usage: "true"
+        cuda-graph-trace: "graph"
+
+      worker_nsight_options:
+        trace: "cuda,nvtx,cublas,ucx"
+        cuda-memory-usage: "true"
+        cuda-graph-trace: "graph"
+        capture-range: "cudaProfilerApi"
+        capture-range-end: null
+        kill: none
+
+    torch_memory:
+
+      trace_alloc_max_entries: 100_000
+
+      stack_depth: 32
+
+      context: "all"
+
+      stacks: "all"
+
+      kw_args: {}
+
+# Transfer queue
+transfer_queue:
+
+  enable: False
+
+# Ray initialization - accessed directly as config.ray_init in main_two_pass.py
+ray_init:
+
+  num_cpus: null
+
+  temp_dir: null
+
+  object_store_memory: null
+
+  object_spilling_dirs: null
+
+  timeline_json_file: null

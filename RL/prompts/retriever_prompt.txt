@@ -1,0 +1,30 @@
+Task Overview:
+You are a database schema specialist. Below, you are provided with a database schema and a natural language question. Your task is to identify the minimum necessary tables and columns required to construct a valid SQL query that answers the question.
+
+Database Engine:
+SQLite
+
+Database Schema: 
+{schema} 
+This schema describes the database's structure, including tables, columns, primary keys, and foreign keys.
+
+Question: 
+{question}
+
+Instructions:
+
+-Inclusion Criteria: Only include columns used in SELECT, WHERE, JOIN (Foreign/Primary Keys),ORDER BY,etc.
+
+-Join Integrity: For multi-table questions, you must include all columns required to form a complete join path.
+
+-Strict Minimalism: Do not include any extra columns (like descriptions or notes) unless explicitly asked for.
+
+
+Output Format:
+In your answer, please think step by step and enclose the needed columns and tables in a code block at the end:
+- Include a <think>...</think> reasoning block before the final column list.
+```
+[table1.column1, table2.column2, ...]
+```
+
+Take a deep breath and think step by step to find the most relevant columns.

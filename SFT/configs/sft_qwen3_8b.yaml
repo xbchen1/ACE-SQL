@@ -1,0 +1,38 @@
+### Model
+model_name_or_path: models/Qwen3-8B
+trust_remote_code: true
+
+### Method
+stage: sft
+do_train: true
+finetuning_type: full
+
+### Dataset
+dataset: domain1_sft_think,domain2_sft_think
+dataset_dir: data
+template: qwen
+cutoff_len: 4096
+overwrite_cache: true
+preprocessing_num_workers: 16
+dataloader_num_workers: 4
+
+### Output
+output_dir: outputs/sft_qwen3_8b
+logging_steps: 5
+save_steps: 100
+plot_loss: true
+overwrite_output_dir: true
+save_only_model: false
+report_to: wandb
+run_name: ace-sql-sft
+
+### Train
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 4
+learning_rate: 2.0e-5
+num_train_epochs: 2.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+bf16: true
+ddp_timeout: 180000000
+deepspeed: configs/deepspeed_zero3.json
