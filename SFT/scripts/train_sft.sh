@@ -18,11 +18,5 @@ fi
 
 export WANDB_MODE="${ACE_SQL_WANDB_MODE:-offline}"
 
-echo "========== ACE-SQL SFT =========="
-echo "Domain1: 7092 samples (think mode)"
-echo "Domain2: 9309 samples (think mode)"
-echo "Total: 16401 samples"
-free -h
-echo "================================================"
 
 FORCE_TORCHRUN=1 NNODES=1 NPROC_PER_NODE=4 llamafactory-cli train configs/sft_qwen3_8b.yaml
