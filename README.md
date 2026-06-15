@@ -9,6 +9,12 @@ ACE-SQL is a reinforcement-learning framework for Text-to-SQL over large and com
 
 The paper reports **65.3% greedy execution accuracy on BIRD Dev** with **0.93k generated output tokens per query**, using 14,184 supervised fine-tuning samples and 2,913 reinforcement-learning question-database pairs.
 
+<p align="center">
+  <img src="assets/ace_sql_overview.png" width="90%" alt="ACE-SQL Overview">
+  <br>
+  <em>Figure 1: Overview of the ACE-SQL framework. Left: self-distillation SFT cold start. Right: joint two-pass GRPO training with empirical credit assignment and PCGrad policy update.</em>
+</p>
+
 ## Highlights
 
 - **Adaptive retrieval supervision.** ACE-SQL maintains an empirical column-set pool for each question and uses execution-correct generator rollouts to derive on-policy retrieval targets — no gold-column labels needed during RL.
