@@ -5,10 +5,6 @@
 
 Official repository for **[ACE-SQL: Adaptive Co-Optimization via Empirical Credit Assignment for Text-to-SQL](https://arxiv.org/abs/2606.05906)**.
 
-> Xiaobing Chen, Ai Jian, Eryu Guo, Zhiqi Pang
->
-> Harbin Engineering University, Harbin Institute of Technology, Beijing University of Posts and Telecommunications
-
 ACE-SQL is a reinforcement-learning framework for Text-to-SQL over large and complex database schemas. It treats schema retrieval and SQL generation as two roles of a shared LLM policy, then jointly optimizes them with execution feedback. The core idea is to assign credit to schema-retrieval actions from the generator's own execution-correct rollouts, rather than training the retriever only against a fixed gold-column target.
 
 The paper reports **65.3% greedy execution accuracy on BIRD Dev** with **0.93k generated output tokens per query**, using 14,184 supervised fine-tuning samples and 2,913 reinforcement-learning question-database pairs.
