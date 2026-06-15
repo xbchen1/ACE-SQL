@@ -1,9 +1,12 @@
 # ACE-SQL
 
 [![arXiv](https://img.shields.io/badge/arXiv-2606.05906-b31b1b.svg)](https://arxiv.org/abs/2606.05906)
+[![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-yellow)](https://huggingface.co/datasets/xiaobing11/ACE-SQL)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Official repository for **[ACE-SQL: Adaptive Co-Optimization via Empirical Credit Assignment for Text-to-SQL](https://arxiv.org/abs/2606.05906)**.
+
+The released SFT, RL, and empirical-pool data is available on the [Hugging Face Hub](https://huggingface.co/datasets/xiaobing11/ACE-SQL).
 
 ACE-SQL is a reinforcement-learning framework for Text-to-SQL over large and complex database schemas. It treats schema retrieval and SQL generation as two roles of a shared LLM policy, then jointly optimizes them with execution feedback. The core idea is to assign credit to schema-retrieval actions from the generator's own execution-correct rollouts, rather than training the retriever only against a fixed gold-column target.
 
