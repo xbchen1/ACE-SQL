@@ -1,0 +1,29 @@
+# Relative paths resolve against --project, ACE_SQL_HOME, or the working directory.
+[paths]
+model = "models/sft_checkpoint"
+reference = "models/sft_torch_dist"
+slime = "external/slime"
+data = ".runs/data"
+output = ".runs/paper"
+
+[training]
+model_size = "8B"
+seed = 42
+questions = 16
+gpus = 8
+epochs = 5
+learning_rate = 1e-6
+warmup_fraction = 0.05
+kl_coefficient = 0.001
+clip = 0.2
+prompt_tokens = 4096
+response_tokens = 2048
+temperature = 1.0
+save_interval = 80
+eval_interval = 40
+
+[method]
+target_mode = "online"
+pool_gamma = 0.5
+ramp_ratio = 0.25
+length_penalty = true

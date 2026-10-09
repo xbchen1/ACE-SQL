@@ -1,5 +1,0 @@
-# Adapter-only CPU dependencies. This is NOT a CUDA / slime installation recipe.
-# Use the separately verified target runtime; do not pip install legacy requirements.txt.
-numpy>=1.24,<2
-pyarrow==25.0.1
-sqlglot==30.21.0

@@ -1,0 +1,5 @@
+[paths]
+output = ".runs/no-decay"
+
+[method]
+pool_gamma = 1.0

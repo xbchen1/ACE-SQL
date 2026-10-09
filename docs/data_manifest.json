@@ -1,23 +1,23 @@
 {
   "revision": "2026-10-09",
   "files": {
-    "SFT/data/domain1_alpaca_think.json": {
+    "data/sft/domain1_alpaca_think.json": {
       "sha256": "4bf2336ab25c5080a254bda6ef853f75746136c5ecb37fe83239d54e7d57e439",
       "bytes": 92576637
     },
-    "SFT/data/domain2_alpaca_think.json": {
+    "data/sft/domain2_alpaca_think.json": {
       "sha256": "81aaa694f0bc242a56d3653a2922bda7f9cfa97db292c850bd23a7b00f76d613",
       "bytes": 29529023
     },
-    "RL/data/train.parquet": {
+    "data/rl/train.parquet": {
       "sha256": "1a91d90ebf1277bd3ec2bef8d3437629ed5ba805bbbd1f024ed151d6d9bc0023",
       "bytes": 21137112
     },
-    "RL/data/validation.parquet": {
+    "data/rl/validation.parquet": {
       "sha256": "ec747252c4549a02cffb854780e1ada3a1f09bb8aa17b00f1b7ef2597e64aa84",
       "bytes": 332499
     },
-    "RL/data/initial_pool.json": {
+    "data/rl/initial_pool.json": {
       "sha256": "03ac7d6c7276a83f5730e40aa710675f5e843ca636c80aac209e2c5e09b7a0c1",
       "bytes": 940838
     }

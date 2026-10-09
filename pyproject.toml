@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ace-sql"
+version = "0.2.0"
+description = "Shared-policy Text-to-SQL reinforcement learning on slime"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = ["numpy>=1.24,<2", "pyarrow==25.0.1", "sqlglot==30.21.0"]
+
+[project.optional-dependencies]
+test = ["torch>=2.9,<3", "pytest>=8", "func-timeout>=4.3", "tqdm>=4.65", "nltk>=3.8", "sqlparse>=0.5"]
+evaluation = ["vllm", "transformers", "tqdm", "nltk", "pyserini", "ijson", "func-timeout", "gdown", "sqlparse>=0.5"]
+
+[project.scripts]
+ace-sql = "ace_sql.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools.package-data]
+"ace_sql.schema" = ["templates/*.txt"]
+"ace_sql.runtime" = ["patches/*.patch"]
+"ace_sql.evaluation.omnisql_eval.test_suite_sql_eval" = ["LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

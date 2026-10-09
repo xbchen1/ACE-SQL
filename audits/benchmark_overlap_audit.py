@@ -230,14 +230,15 @@ def load_json(path: Path) -> Any:
 
 
 def load_retriever_sft(repo: Path, explicit_path: Path | None) -> tuple[list, dict]:
-    if explicit_path and explicit_path.exists():
+    explicit_path = explicit_path or repo / "data/sft/domain1_alpaca_think.json"
+    if explicit_path.exists():
         raw = explicit_path.read_bytes()
-        origin = "provided-file:SFT/data/domain1_alpaca_think.json"
+        origin = "provided-file:data/sft/domain1_alpaca_think.json"
     else:
         raw = subprocess.check_output(
-            ["git", "-C", str(repo), "show", "HEAD:SFT/data/domain1_alpaca_think.json"]
+            ["git", "-C", str(repo), "show", "HEAD:data/sft/domain1_alpaca_think.json"]
         )
-        origin = "git:HEAD:SFT/data/domain1_alpaca_think.json"
+        origin = "git:HEAD:data/sft/domain1_alpaca_think.json"
     return json.loads(raw), {"origin": origin, "sha256": sha256_bytes(raw)}
 
 
@@ -325,8 +326,8 @@ def _benchmark_records(name: str, rows: list[dict[str, Any]]) -> list[dict[str, 
 
 def run_audit(args: argparse.Namespace) -> dict[str, Any]:
     repo = args.repo.resolve()
-    generator_path = repo / "SFT/data/domain2_alpaca_think.json"
-    rl_path = repo / "RL/data/train.parquet"
+    generator_path = repo / "data/sft/domain2_alpaca_think.json"
+    rl_path = repo / "data/rl/train.parquet"
 
     generator_raw = load_json(generator_path)
     generator_rows = [extract_sft_record(row, "generator") for row in generator_raw]
@@ -397,13 +398,13 @@ def run_audit(args: argparse.Namespace) -> dict[str, Any]:
         },
         "inputs": {
             "sft_generator": {
-                "path": "SFT/data/domain2_alpaca_think.json",
+                "path": "data/sft/domain2_alpaca_think.json",
                 "sha256": sha256_file(generator_path),
                 "rows": len(generator_rows),
             },
             "sft_retriever": {**retriever_manifest, "rows": len(retriever_rows)},
             "rl_train": {
-                "path": "RL/data/train.parquet",
+                "path": "data/rl/train.parquet",
                 "sha256": sha256_file(rl_path),
                 "rows": len(rl_rows),
             },

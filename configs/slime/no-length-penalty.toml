@@ -1,0 +1,5 @@
+[paths]
+output = ".runs/no-length-penalty"
+
+[method]
+length_penalty = false

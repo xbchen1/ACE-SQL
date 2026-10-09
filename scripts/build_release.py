@@ -15,12 +15,12 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = {
-    'SFT/data/domain1_alpaca_think.json', 'SFT/data/domain2_alpaca_think.json',
-    'SFT/data/dataset_info.json', 'RL/data/train.parquet',
-    'RL/data/validation.parquet', 'RL/data/initial_pool.json',
+    'data/sft/domain1_alpaca_think.json', 'data/sft/domain2_alpaca_think.json',
+    'data/sft/dataset_info.json', 'data/rl/train.parquet',
+    'data/rl/validation.parquet', 'data/rl/initial_pool.json',
 }
-ALLOWED_ROOTS = {'SFT', 'RL', 'EVAL', 'assets', 'audits', 'docs', 'scripts'}
-ROOT_FILES = {'README.md', 'LICENSE', '.gitignore'}
+ALLOWED_ROOTS = {'src', 'configs', 'data', 'tests', 'assets', 'audits', 'docs', 'scripts'}
+ROOT_FILES = {'README.md', 'LICENSE', '.gitignore', 'pyproject.toml', 'Makefile'}
 
 
 def main():
@@ -30,8 +30,10 @@ def main():
     args = parser.parse_args()
     files = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode().split('\0')
     files = sorted(p for p in files if p and (p in ROOT_FILES or Path(p).parts[0] in ALLOWED_ROOTS))
-    if not DATA <= set(files) or 'RL/ace_sql_slime/core.py' not in files:
-        raise SystemExit('Stage the complete release, including both SFT datasets and the adapter core, first.')
+    if any(Path(p).parts[0] in {'RL', 'SFT', 'EVAL'} for p in files):
+        raise ValueError('Legacy source roots are not part of this release')
+    if not DATA <= set(files) or 'src/ace_sql/rewards/engine.py' not in files:
+        raise SystemExit('Stage the complete release, including both SFT datasets and the installed package sources, first.')
     args.output_dir.mkdir(parents=True, exist_ok=True)
     manifest = {'format': 1, 'anonymous': args.anonymous, 'archives': {}}
     for category in ('software', 'data'):

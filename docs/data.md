@@ -4,11 +4,11 @@
 
 | File | Records | Purpose |
 | --- | ---: | --- |
-| `SFT/data/domain1_alpaca_think.json` | 7,092 | Retriever SFT examples |
-| `SFT/data/domain2_alpaca_think.json` | 7,092 | Generator SFT examples |
-| `RL/data/train.parquet` | 2,913 | RL question/database pairs |
-| `RL/data/validation.parquet` | 40 | Runtime validation questions |
-| `RL/data/initial_pool.json` | 2,953 keys | Initial column-set counts for both splits |
+| `data/sft/domain1_alpaca_think.json` | 7,092 | Retriever SFT examples |
+| `data/sft/domain2_alpaca_think.json` | 7,092 | Generator SFT examples |
+| `data/rl/train.parquet` | 2,913 | RL question/database pairs |
+| `data/rl/validation.parquet` | 40 | Runtime validation questions |
+| `data/rl/initial_pool.json` | 2,953 keys | Initial column-set counts for both splits |
 
 The retriever SFT JSON was restored from the repository's existing committed snapshot, with the same SHA-256 as the historical overlap audit. The other dataset bytes are unchanged. Database-cell examples can contain literal file paths from the source data; they are not runtime filesystem locations.
 

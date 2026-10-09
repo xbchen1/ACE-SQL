@@ -31,7 +31,7 @@ The intended use is to assess whether the 7,092-example SFT roles and the 2,913-
 
 ### Key assumptions
 
-- The SFT retriever file is read from the worktree when supplied, otherwise from the fixed Git `HEAD` blob.
+- The SFT retriever file is read from `data/sft/` by default; an explicit path overrides it. Git is only a fallback if that file is absent.
 - The generator prompt schema is reported as a prompt schema, not silently treated as a full catalog.
 - Exact or near SQL alone is not labeled leakage without database/schema agreement."""
     ),

@@ -22,3 +22,5 @@ python audits/benchmark_overlap_audit.py \
 Both SFT files are now included. The retriever file was restored byte-for-byte from the published Git snapshot and matches the hash recorded in the historical result manifest. The audit runs from a source archive without Git history. Use `--retriever-sft-json` (or `ACE_SQL_AUDIT_RETRIEVER_SFT_JSON` in the notebook) to audit another snapshot; preserve a separate output directory for that run.
 
 The result manifest stores input labels, SHA-256 hashes, row counts, and runtime versions, but never absolute local paths. SynSQL SQLite files were unavailable, so database-content equality remains unresolved. The audit covers the retained SFT role snapshots and 2,913-row RL split, not the full SynSQL-2.5M source pool.
+
+The refactor moved dataset inputs to `data/sft/` and `data/rl/` without changing their bytes. Historical result JSON and notebook outputs retain their original path labels and code hashes. New CLI runs use the current paths; store new results in a separate directory.

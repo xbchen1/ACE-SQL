@@ -8,7 +8,7 @@
 
 ACE-SQL trains schema retrieval and SQL generation as two roles of one shared language model. Execution-correct SQL rollouts supply adaptive column-set targets for the retriever, while the retriever's selections define the generator's schema context.
 
-This repository follows the **October 9, 2026 manuscript revision**. The current training entrypoint uses **slime**, SGLang, and Megatron with direct joint GRPO. See [paper-to-code alignment](docs/paper_alignment.md) for the exact source fingerprints and validation scope. The linked arXiv preprint and dataset release may precede this revision.
+This repository follows the **October 9, 2026 manuscript revision**. The training package is built around **slime**, SGLang, and Megatron with direct joint GRPO. See [paper-to-code alignment](docs/paper_alignment.md) for the exact source fingerprints and validation scope. The linked arXiv preprint and dataset release may precede this revision.
 
 ![ACE-SQL overview](assets/ace_sql_overview.png)
 
@@ -33,60 +33,77 @@ The 8B model uses **0.87k output tokens per query**, summed across both roles. T
 
 Evaluation uses one greedy retrieval followed by one greedy SQL generation. Evaluation does not update the pool.
 
-## Repository guide
+## Repository structure
 
-| Directory | Contents |
+The runtime is an installable `ace_sql` package. Slime owns distributed training and checkpoint tensors; ACE-SQL owns two-role sampling, credit assignment, per-role objectives, and reproducible question/pool state.
+
+| Path | Responsibility |
 | --- | --- |
-| [SFT](SFT/README.md) | LLaMA-Factory configurations, launch script, and both SFT datasets |
-| [RL](RL/README.md) | Current slime training adapter, launchers, rewards, tests, and RL data |
-| [EVAL](EVAL/README.md) | BIRD, Spider, and Spider robustness evaluation |
-| [docs](docs/paper_alignment.md) | Method mapping, data manifest, and release limitations |
-| [audits](audits/README.md) | Historical overlap audit, rerunnable code, and input fingerprints |
+| `src/ace_sql/data/` | Released-row validation, tokenizer filtering, conversion, database resolution |
+| `src/ace_sql/schema/` | Shared column parsing, schema union, DDL and prompt resources |
+| `src/ace_sql/rewards/` | SQLite execution, result comparison, empirical counts and retrieval/SQL rewards |
+| `src/ace_sql/training/` | Slime data source/rollout/loss hooks, experiment configuration and HF export checks |
+| `src/ace_sql/runtime/` | Pinned environment validation, metadata patch, reference/data preparation |
+| `src/ace_sql/evaluation/` | Shared-policy inference, BIRD/Spider/robustness pipelines and benchmark evaluators |
+| `configs/` | Slime paper/control experiments, LLaMA-Factory SFT and evaluation settings |
+| `data/` | Immutable SFT/RL data; hashes in [data manifest](docs/data_manifest.json) |
+| `tests/` | CPU method, package, pipeline and pinned upstream contract checks |
+| `docs/`, `audits/` | [Architecture](docs/architecture.md), [paper mapping](docs/paper_alignment.md), data provenance and historical audits |
 
-The older `RL/trainer/`, `RL/third_party/verl/`, and `train_rl_pcgrad.sh` are retained for legacy compatibility. They are not the current paper recipe and are not invoked by `train_rl.sh`.
+The legacy `RL/`, `SFT/`, and `EVAL/` trees are removed. The vendored verl trainer, PCGrad path, duplicate reward manager, and FSDP/LoRA checkpoint-merging workflow are available only in Git history. The retained third-party Spider evaluator has its original license.
 
-## Run
+## Install and preview
 
-Use separate environments for SFT, RL, and evaluation. SQLite databases and checkpoints must be supplied separately; [data documentation](docs/data.md) describes the included files.
-
-SFT (default: eight GPUs, one epoch):
-
-```bash
-cd SFT
-bash scripts/train_sft.sh
-```
-
-RL configuration preview (no GPU or model load):
+From the repository root, in a Python 3.11+ environment:
 
 ```bash
-bash RL/scripts/train_rl.sh --dry-run
+python -m pip install -e .
+ace-sql train --config configs/slime/paper.toml --dry-run
+ace-sql prepare --config configs/slime/paper.toml --dry-run
 ```
 
-For training, follow the [slime setup and checkpoint conversion guide](RL/README.md) and the [pinned H20/CUDA environment](RL/configs/slime-h20-compatibility.md). The paper recipe uses eight H20 GPUs, five epochs, a learning rate of `1e-6`, group size eight per role, and KL coefficient `0.001`.
+Commands can run outside the checkout: `ace-sql --project /path/to/ACE-SQL train --dry-run`. Runtime assets resolve against `--project`, `ACE_SQL_HOME`, or the working directory. Package installation does not install a GPU framework or copy datasets into site-packages.
 
-BIRD greedy evaluation of an exported shared-policy checkpoint:
+## Train and evaluate
+
+Use separate environments for SFT, slime training, and vLLM evaluation. Supply model checkpoints and SQLite databases as described in [data.md](docs/data.md).
 
 ```bash
-cd EVAL
-MODEL_PATH=/path/to/checkpoint SQL_MODEL=/path/to/checkpoint \
-BIRD_DEV_DATA=/path/to/bird/dev.json \
-BIRD_TABLES=/path/to/bird/dev_tables.json \
-BIRD_DB_PATH=/path/to/bird/dev_databases \
-bash eval_bird_maj.sh
+# SFT in a LLaMA-Factory environment: eight GPUs, one epoch.
+bash scripts/train_sft.sh model_name_or_path=/path/to/Qwen3-8B
+
+# RL on the pinned Linux/H20 runtime; inspect paths before running.
+export ACE_SQL_CONFIG="$PWD/configs/slime/paper.toml"
+export ACE_SQL_MODEL_PATH=/assets/models/sft_checkpoint
+export ACE_SQL_REFERENCE_PATH=/assets/models/sft_torch_dist
+export ACE_SQL_TRAIN_DB_ROOT=/assets/databases/train
+export ACE_SQL_DEV_DB_ROOT=/assets/databases/dev
+bash scripts/container.sh train
 ```
 
-See [EVAL](EVAL/README.md) for Spider and robustness commands. BIRD uses its benchmark set-based execution comparison; training uses ordered row/column comparison. Training SQL timeout is 30 seconds; BIRD evaluation defaults to 180 seconds.
-
-## Verification
+The container installs the package, validates the pinned stack, applies the reviewed metadata patch, prepares the reference checkpoint/data, and runs slime. See [training](docs/training.md) and [runtime](docs/runtime.md) for controls, recovery, mounted assets and validation limits.
 
 ```bash
-python -m pip install -r RL/configs/requirements-test.txt
-make -C RL syntax
-make -C RL test
-python scripts/verify_release.py
+# In an evaluation environment with a compatible vLLM installation:
+python -m pip install -e '.[evaluation]'
+export BIRD_DEV_DATA=/path/to/bird/dev.json
+export BIRD_TABLES=/path/to/bird/dev_tables.json
+export BIRD_DB_PATH=/path/to/bird/dev_databases
+ace-sql eval-bird --model /path/to/run/hf/rollout_80 --output .runs/bird_80
 ```
 
-CPU tests exercise actual SQLite execution, pool updates, role-separated advantages, weighted PPO/KL loss, validation isolation, and checkpoint recovery with mocked model responses. Optional integration tests inspect the pinned slime source. **GPU training, distributed weight synchronization, and the reported benchmark scores have not been revalidated by this release update.**
+Both roles use the same complete HF export. Greedy decoding is the default. [Evaluation documentation](docs/evaluation.md) includes Spider and two-stage robustness evaluation. Training compares ordered results with a 30-second SQL timeout; BIRD retains its benchmark set comparison and 180-second timeout.
+
+## Verification and source releases
+
+```bash
+python -m pip install -e '.[test]'
+make syntax test verify
+# Stage the intended files before building an archive from Git's inventory.
+python scripts/build_release.py --output-dir /path/to/release
+```
+
+CPU checks include SQLite rewards, role-separated advantages, weighted PPO/KL, rollback and checkpoint replay, configuration validation, installed resources, and a BIRD pipeline with only model responses mocked. Optional pinned upstream checks are described in [training.md](docs/training.md). **GPU training, distributed synchronization and manuscript scores have not been revalidated by this refactor.**
 
 ## License and dependencies
 

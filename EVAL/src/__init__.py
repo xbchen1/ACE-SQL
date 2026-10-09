@@ -1,1 +1,0 @@
-# Bird Dev Eval package
