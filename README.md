@@ -1,14 +1,12 @@
 # ACE-SQL
 
-[![arXiv](https://img.shields.io/badge/arXiv-2606.05906-b31b1b.svg)](https://arxiv.org/abs/2606.05906)
-[![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-yellow)](https://huggingface.co/datasets/xiaobing11/ACE-SQL)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Adaptive Co-Optimization via Empirical Credit Assignment for Text-to-SQL**
 
 ACE-SQL trains schema retrieval and SQL generation as two roles of one shared language model. Execution-correct SQL rollouts supply adaptive column-set targets for the retriever, while the retriever's selections define the generator's schema context.
 
-This repository follows the **October 9, 2026 manuscript revision**. The training package is built around **slime**, SGLang, and Megatron with direct joint GRPO. See [paper-to-code alignment](docs/paper_alignment.md) for the exact source fingerprints and validation scope. The linked arXiv preprint and dataset release may precede this revision.
+This repository follows the **October 9, 2026 manuscript revision**. The training package is built around **slime**, SGLang, and Megatron with direct joint GRPO. See [paper-to-code alignment](docs/paper_alignment.md) for the exact source fingerprints and validation scope. This anonymous release accompanies the October manuscript revision.
 
 ![ACE-SQL overview](assets/ace_sql_overview.png)
 

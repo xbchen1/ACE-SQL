@@ -30,7 +30,7 @@ The package separates the Text-to-SQL method from distributed execution. There i
 | Scattered launch environment settings | Validated `configs/slime/*.toml` |
 | SFT/RL embedded datasets | `data/sft/` and `data/rl/`, unchanged fingerprints |
 | `EVAL/` scripts and checkpoint merging | `evaluation/`, direct complete HF export input |
-| `RL/trainer/`, vendored verl, PCGrad | Removed; inspect commit `daae1a0` for historical implementation |
+| `RL/trainer/`, vendored verl, PCGrad | Removed from this release; previous implementations remain in project history |
 
 The data-source checkpoint schema and method identifier remain compatible with the immediately preceding October 9 union/current-pool slime implementation. Pre-October method states remain incompatible. This preserves semantic checks while removing the dependency on its old Python module names.
 
