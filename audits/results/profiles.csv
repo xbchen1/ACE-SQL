@@ -1,0 +1,6 @@
+source,rows,unique_normalized_questions,unique_normalized_sql
+SFT-retriever,7092,7088.0,
+SFT-generator,7092,7090.0,
+RL,2913,2913.0,
+SFT-generator SQL,7092,,7072.0
+RL SQL,2913,,2913.0

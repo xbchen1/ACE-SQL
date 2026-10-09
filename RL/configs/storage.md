@@ -1,6 +1,6 @@
 # Storage Layout
 
-This repo keeps only the code and the three files used by the RL PCGrad entrypoint:
+This repo keeps only the code and the three files used by the standard role-isolated RL entrypoint:
 
 - `data/train.parquet`
 - `data/initial_pool.json`

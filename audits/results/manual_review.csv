@@ -1,0 +1,2 @@
+benchmark,training_source,benchmark_row,train_row,verdict,reason,reviewer_count,reviewer_role
+BIRD,SFT-generator,1056,5983,near-semantic wording; not joint contamination,"Both questions ask for a Netherlands football league/division, but the training prompt uses a different one-table schema and a different SQL route from the BIRD example.",1,author data audit

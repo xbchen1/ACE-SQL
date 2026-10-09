@@ -53,7 +53,7 @@ VERL_ROOT = os.environ.get("VERL_ROOT", "")
 VLLM_CONFIG = {
     "dtype": os.environ.get("VLLM_DTYPE", "bfloat16"),
     "tensor_parallel_size": _env_int("TENSOR_PARALLEL_SIZE", 1),
-    "max_model_len": _env_int("MAX_MODEL_LEN", 8192),
+    "max_model_len": _env_int("MAX_MODEL_LEN", 6144),
     "gpu_memory_utilization": _env_float("GPU_MEMORY_UTILIZATION", 0.95),
     "swap_space": _env_int("VLLM_SWAP_SPACE", 42),
     "enforce_eager": os.environ.get("VLLM_ENFORCE_EAGER", "true").lower() in {"1", "true", "yes"},
@@ -65,7 +65,7 @@ VLLM_CONFIG = {
 
 RETRIEVER_INFER_CONFIG = {
     "temperature": _env_float("RETRIEVER_TEMPERATURE", 0.0),
-    "max_tokens": _env_int("RETRIEVER_MAX_TOKENS", 512),
+    "max_tokens": _env_int("RETRIEVER_MAX_TOKENS", 2048),
     "stop_token_ids": [151645],
 }
 

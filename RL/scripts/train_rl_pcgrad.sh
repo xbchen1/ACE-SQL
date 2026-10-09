@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Joint two-pass GRPO training with PCGrad enabled for shared-policy updates.
+# LEGACY VERL joint two-pass GRPO launcher (not the current paper recipe).  The historical filename is retained for
+# compatibility; gradient projection is disabled by default and is enabled only
+# when reproducing the dedicated PCGrad diagnostic explicitly.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -36,7 +38,7 @@ export ACE_SQL_DUAL_LORA_ENABLED=False
 export ACE_SQL_LORA_RANK=0
 export ACE_SQL_LORA_ALPHA=0
 
-export ACE_SQL_EXPERIMENT_NAME="${ACE_SQL_EXPERIMENT_NAME:-rl_pcgrad}"
+export ACE_SQL_EXPERIMENT_NAME="${ACE_SQL_EXPERIMENT_NAME:-rl_role_isolated}"
 export ACE_SQL_MODEL_PATH="${ACE_SQL_MODEL_PATH:-models/sft_checkpoint}"
 export ACE_SQL_TRAIN_FILE="${ACE_SQL_TRAIN_FILE:-data/train.parquet}"
 export ACE_SQL_VAL_FILE="${ACE_SQL_VAL_FILE:-data/validation.parquet}"
@@ -88,7 +90,7 @@ export ACE_SQL_RETRIEVER_LOSS_WEIGHT_END="${ACE_SQL_RETRIEVER_LOSS_WEIGHT_END:-1
 export ACE_SQL_GENERATOR_LOSS_WEIGHT_START="${ACE_SQL_GENERATOR_LOSS_WEIGHT_START:-0.0}"
 export ACE_SQL_GENERATOR_LOSS_WEIGHT_END="${ACE_SQL_GENERATOR_LOSS_WEIGHT_END:-1.0}"
 
-export ACE_SQL_GRAD_PROJ_ENABLED="${ACE_SQL_GRAD_PROJ_ENABLED:-True}"
+export ACE_SQL_GRAD_PROJ_ENABLED="${ACE_SQL_GRAD_PROJ_ENABLED:-False}"
 export ACE_SQL_GRAD_PROJ_MODE="${ACE_SQL_GRAD_PROJ_MODE:-symmetric}"
 export ACE_SQL_GRAD_PROJ_NORMALIZE_TASK_GRADS="${ACE_SQL_GRAD_PROJ_NORMALIZE_TASK_GRADS:-False}"
 export ACE_SQL_GRAD_PROJ_MAIN_TASK="${ACE_SQL_GRAD_PROJ_MAIN_TASK:-generator}"
@@ -189,18 +191,18 @@ require_value() {
     local expected="$2"
     local actual="${!name:-}"
     if [ "${actual}" != "${expected}" ]; then
-        echo "Invalid full-PCGrad config: ${name}=${actual}, expected ${expected}" >&2
+        echo "Invalid fixed training config: ${name}=${actual}, expected ${expected}" >&2
         exit 1
     fi
 }
 
-require_true() {
+require_bool() {
     local name="$1"
     local actual="${!name:-}"
     case "${actual}" in
-        True|true|1|yes|on) ;;
+        True|true|1|yes|on|False|false|0|no|off) ;;
         *)
-            echo "Invalid full-PCGrad config: ${name}=${actual}, expected true" >&2
+            echo "Invalid boolean config: ${name}=${actual}" >&2
             exit 1
             ;;
     esac
@@ -261,7 +263,7 @@ require_value ACE_SQL_DUAL_LORA_ENABLED False
 require_value ACE_SQL_LORA_RANK 0
 require_value ACE_SQL_LORA_ALPHA 0
 require_value ACE_SQL_TRAINING_PHASE_SCHEDULE joint
-require_true ACE_SQL_GRAD_PROJ_ENABLED
+require_bool ACE_SQL_GRAD_PROJ_ENABLED
 require_file "${ACE_SQL_MODEL_PATH}/config.json" "model config"
 require_file "${ACE_SQL_TRAIN_FILE}" "train parquet"
 require_file "${ACE_SQL_VAL_FILE}" "validation parquet"
@@ -346,20 +348,20 @@ if missing_val:
     errors.append(f"val keys missing from pool: {len(missing_val)}; first={missing_val[0][:160]}")
 
 print(
-    "[rl-pcgrad data preflight] "
+    "[rl data preflight] "
     f"train_rows={len(train_df)} train_keys={len(train_keys)} "
     f"val_rows={len(val_df)} val_keys={len(val_keys)} "
     f"pool_keys={len(pool)}"
 )
 if errors:
-    print("[rl-pcgrad data preflight] FAILED", file=sys.stderr)
+    print("[rl data preflight] FAILED", file=sys.stderr)
     for err in errors:
         print(f"  - {err}", file=sys.stderr)
     sys.exit(1)
-print("[rl-pcgrad data preflight] OK")
+print("[rl data preflight] OK")
 PY
 
-echo "===== ACE-SQL RL PCGrad Training Configuration ====="
+echo "===== ACE-SQL Joint RL Training Configuration ====="
 echo "Model path:           ${ACE_SQL_MODEL_PATH}"
 echo "Experiment name:      ${ACE_SQL_EXPERIMENT_NAME}"
 echo "Train file:           ${ACE_SQL_TRAIN_FILE}"

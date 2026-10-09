@@ -1,0 +1,5 @@
+benchmark,training_source,benchmark_row,benchmark_db_id,benchmark_question,benchmark_sql,train_row,train_question,train_sql
+Spider,SFT-generator,429,wta_1,Find the total number of players.,SELECT count(*) FROM players,6572,How many players are there in the players table?,"SELECT COUNT(*) 
+FROM players;"
+Spider,SFT-generator,430,wta_1,How many players are there?,SELECT count(*) FROM players,6572,How many players are there in the players table?,"SELECT COUNT(*) 
+FROM players;"

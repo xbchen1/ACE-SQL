@@ -66,7 +66,8 @@ def extract_sql_from_response(solution_str: str) -> Tuple[Optional[str], Optiona
     return pred_sql, answer_text, think_text, True
 
 
-def compute_sql_reward(solution_str: str, ground_truth: dict, gen_resp_len: Optional[int] = None) -> Tuple[float, float, dict]:
+def compute_sql_reward(solution_str: str, ground_truth: dict, gen_resp_len: Optional[int] = None,
+                       length_penalty_enabled: bool = True) -> Tuple[float, float, dict]:
     """
     Strict two-bin SQL reward:
       - correct SQL with the required response format: 1 plus length penalty
@@ -86,7 +87,7 @@ def compute_sql_reward(solution_str: str, ground_truth: dict, gen_resp_len: Opti
 
     pred_sql, _answer_text, _think_text, format_correct = extract_sql_from_response(solution_str)
 
-    raw_length_score = compute_length_penalty(gen_resp_len)
+    raw_length_score = compute_length_penalty(gen_resp_len) if length_penalty_enabled else 0.0
 
     if not format_correct or not pred_sql:
         sql_detail = {
@@ -115,7 +116,7 @@ def compute_sql_reward(solution_str: str, ground_truth: dict, gen_resp_len: Opti
             if pred_result is None:
                 exec_status = 'Unexecutable'
             else:
-                is_correct, _ = grade(list(gold_result), list(pred_result), grading_method="multiset")
+                is_correct, _ = grade(list(gold_result), list(pred_result), grading_method="ordered")
                 exec_status = 'Match' if is_correct else 'Mismatch'
     except BaseException:
         exec_status = 'Unexecutable'
@@ -337,17 +338,19 @@ def compute_pool_exact_retriever_reward(
     exact_reward: float = 1.0,
     ret_resp_len: Optional[int] = None,
     response_length: Optional[int] = None,
+    length_penalty_enabled: bool = True,
 ) -> tuple:
     """
     Sparse retriever reward for the main experiment.
 
-    The target is the highest-frequency column set(s) from the initial pool.
+    The target is the highest-frequency column set(s) after decaying the
+    historical counts and adding this training rollout's matched column sets.
     Any tied max-frequency set is accepted. Format errors, truncated responses,
     and format-correct non-exact responses receive 0. Exact set matches receive
     exact_reward. The shared response length penalty is only applied on exact
     matches.
     """
-    raw_length_score = compute_length_penalty(ret_resp_len)
+    raw_length_score = compute_length_penalty(ret_resp_len) if length_penalty_enabled else 0.0
     truncated = (
         ret_resp_len is not None
         and response_length is not None
@@ -585,7 +588,8 @@ class JointRewardManager:
                  initial_pool_path: Optional[str] = None,
                  useful_noise_bar: float = 0.1,
                  retriever_reward_mode: str = "pool_exact",
-                 pool_exact_reward: float = 1.0):
+                 pool_exact_reward: float = 1.0,
+                 length_penalty_enabled: bool = True):
         self.max_workers = max_workers
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
@@ -597,10 +601,11 @@ class JointRewardManager:
         self.useful_noise_bar = useful_noise_bar
         self.retriever_reward_mode = retriever_reward_mode
         self.pool_exact_reward = float(pool_exact_reward)
-        if self.retriever_reward_mode not in {"v6", "pool_exact"}:
+        self.length_penalty_enabled = bool(length_penalty_enabled)
+        if self.retriever_reward_mode not in {"v6", "pool_exact", "gold_exact", "pool_dense"}:
             raise ValueError(
                 f"Unsupported retriever_reward_mode={self.retriever_reward_mode!r}; "
-                "expected 'v6' or 'pool_exact'"
+                "expected 'v6', 'pool_exact', 'gold_exact', or 'pool_dense'"
             )
 
         # Load pre-built pool from JSON if provided
@@ -756,7 +761,7 @@ class JointRewardManager:
             raise ValueError("gen_resp_lens length does not match gen_texts")
 
         futures = [
-            self.executor.submit(compute_sql_reward, gen_text, gt, gen_resp_len)
+            self.executor.submit(compute_sql_reward, gen_text, gt, gen_resp_len, self.length_penalty_enabled)
             for gen_text, gt, gen_resp_len in zip(gen_texts, ground_truths, gen_resp_lens)
         ]
         rewards = []
@@ -849,7 +854,7 @@ class JointRewardManager:
         if ret_resp_lens is None:
             ret_resp_lens = [None] * n
         futures = [
-            self.executor.submit(compute_sql_reward, gen_text, gt, gen_resp_len)
+            self.executor.submit(compute_sql_reward, gen_text, gt, gen_resp_len, self.length_penalty_enabled)
             for gen_text, gt, gen_resp_len in zip(gen_texts, ground_truths, gen_resp_lens)
         ]
 
@@ -900,11 +905,12 @@ class JointRewardManager:
             )
 
             # --- Pool integration ---
-            # Step 1: Read existing pool entries with historical decay.
-            pool_freq = {}
-            if question_key in self.col_set_pool:
-                for set_key, freq in self.col_set_pool[question_key].items():
-                    pool_freq[set_key] = freq * self.pool_gamma
+            # Algorithm 1: update first, then read the target for this rollout.
+            # Validation/frozen controls read saved counts without decay.
+            pool_freq = {
+                set_key: freq * (self.pool_gamma if update_pool else 1.0)
+                for set_key, freq in self.col_set_pool.get(question_key, {}).items()
+            }
 
             # Step 2: Update pool with current rollout (training only)
             if update_pool:
@@ -916,7 +922,8 @@ class JointRewardManager:
                 updated_pool = dict(pool_freq)
                 for set_key, freq in current_freq.items():
                     updated_pool[set_key] = updated_pool.get(set_key, 0) + freq
-                self.col_set_pool[question_key] = updated_pool
+                pool_freq = {key: freq for key, freq in updated_pool.items() if freq > 0}
+                self.col_set_pool[question_key] = pool_freq
 
             # Step 3: Merge pool col sets into correct_sql_col_sets
             pool_col_sets = [set(set_key) for set_key in pool_freq if pool_freq[set_key] > 0]
@@ -927,11 +934,8 @@ class JointRewardManager:
                     existing_frozen.add(frozenset(pcs))
 
             # Step 4 (V6): Compute best_set, col_weights, useful_set from pool
-            # Combine pool + current batch frequencies for best_set selection
+            # Current matches are already counted in pool_freq; do not count twice.
             all_freq: Dict[frozenset, float] = dict(pool_freq)
-            for col_set in gen_only_correct_col_sets:
-                sk = frozenset(col_set)
-                all_freq[sk] = all_freq.get(sk, 0) + 1
 
             # best_set = highest-frequency col set; tiebreak: fewest columns
             if all_freq:
@@ -973,15 +977,32 @@ class JointRewardManager:
                 gen_text = gen_texts[idx]
                 column_list, pred_indices = group_parsed_results[local_idx]
 
-                if self.retriever_reward_mode == "pool_exact":
+                if self.retriever_reward_mode in {"pool_exact", "gold_exact", "pool_dense"}:
+                    targets = ([gold_indices] if self.retriever_reward_mode == "gold_exact"
+                               else self._target_sets_from_pool(pool_freq))
                     ret_reward, ret_detail = compute_pool_exact_retriever_reward(
                         ret_text=ret_text,
-                        target_sets=self._target_sets_from_pool(pool_freq),
+                        target_sets=targets,
                         pred_indices=pred_indices,
                         exact_reward=self.pool_exact_reward,
                         ret_resp_len=ret_resp_lens[idx],
                         response_length=ret_response_length,
+                        length_penalty_enabled=self.length_penalty_enabled,
                     )
+                    if self.retriever_reward_mode == "pool_dense":
+                        # Appendix F: max route coverage minus out-of-pool noise.
+                        # The historical v6 shaping function is a different diagnostic.
+                        support = [set(key) for key, freq in pool_freq.items() if freq > 0 and key]
+                        if ret_detail["ret_case"] not in {"FORMAT_ERROR", "TRUNCATED", "EMPTY"} and support:
+                            union = set().union(*support)
+                            coverage = max(len(pred_indices & route) / len(route) for route in support)
+                            noise = len(pred_indices - union) / len(pred_indices)
+                            ret_reward = coverage - 0.5 * noise
+                            ret_detail.update(ret_case="POOL_DENSE", coverage_rate=coverage,
+                                              coverage_score=coverage, ret_length_score=0.0,
+                                              noise_count=len(pred_indices - union))
+                        else:
+                            ret_reward = 0.0
                 else:
                     ret_reward, ret_detail = compute_retriever_reward(
                         ret_text=ret_text,

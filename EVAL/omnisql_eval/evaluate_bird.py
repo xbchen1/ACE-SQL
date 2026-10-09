@@ -149,7 +149,7 @@ def execute_sqls_parallel(db_files, sqls, num_cpus=1, timeout=1):
     pool.join()
 
 def sql_validation_timeout():
-    return int(os.environ.get("SQL_VALIDATION_TIMEOUT", "300"))
+    return int(os.environ.get("SQL_VALIDATION_TIMEOUT", "180"))
 
 
 def mark_invalid_sqls(db_files, sqls, timeout=None):

@@ -274,7 +274,7 @@ def merge_retriever_outputs(
         }
         merged_results.append(result)
 
-    print(f"合并完成！{fallback_count} 个样本将使用完整 Schema 作为 fallback")
+    print(f"合并完成！{fallback_count} 个样本未产生非空多数列集；后续将重新解析首个检索输出，若仍为空则使用空 Schema（无 full-schema fallback）")
 
     # 保存结果
     output_dir = Path(output_file).parent

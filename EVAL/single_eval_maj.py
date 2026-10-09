@@ -39,9 +39,10 @@ from config import (
 MAJ_NUM_SAMPLES = 1
 MAJ_TEMPERATURE = 0.0
 
-# 推理最大长度配置
-RETRIEVER_MAX_TOKENS = 4096  # 原来是 512，增大 8 倍
-SQL_MAX_TOKENS = 8192        # 原来是 2048，增大 4 倍
+# Match the released RL response cap by default.  Both values remain
+# environment-overridable for explicitly documented alternative protocols.
+RETRIEVER_MAX_TOKENS = int(os.environ.get("RETRIEVER_MAX_TOKENS", "2048"))
+SQL_MAX_TOKENS = int(os.environ.get("SQL_MAX_TOKENS", "2048"))
 
 
 def run_command(cmd, cwd=None, capture_output=False):
@@ -553,7 +554,7 @@ def evaluate_single_checkpoint_maj(
         "--gold", BIRD_DEV_DATA,
         "--db_path", BIRD_DB_PATH,
         "--mode", eval_mode,
-        "--timeout", "300"
+        "--timeout", os.environ.get("SQL_EVAL_TIMEOUT", "180")
     ], capture_output=True)
 
     # 保存评估日志

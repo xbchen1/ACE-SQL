@@ -5,9 +5,10 @@
 #SBATCH -p compute
 #SBATCH -N 1
 #SBATCH -t 48:00:00
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:8
 #SBATCH --mem=400G
 
+set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${PROJECT_DIR}"
@@ -19,4 +20,12 @@ fi
 export WANDB_MODE="${ACE_SQL_WANDB_MODE:-offline}"
 
 
-FORCE_TORCHRUN=1 NNODES=1 NPROC_PER_NODE=4 llamafactory-cli train configs/sft_qwen3_8b.yaml
+for file in data/domain1_alpaca_think.json data/domain2_alpaca_think.json; do
+  if [[ ! -f "$file" ]]; then
+    echo "Missing SFT data: $file" >&2
+    exit 1
+  fi
+done
+
+FORCE_TORCHRUN=1 NNODES=1 NPROC_PER_NODE="${ACE_SQL_NUM_GPUS:-8}" \
+  llamafactory-cli train "${ACE_SQL_SFT_CONFIG:-configs/sft_qwen3_8b.yaml}" "$@"

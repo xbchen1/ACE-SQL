@@ -1,0 +1,29 @@
+--- a/slime/backends/megatron_utils/model.py
++++ b/slime/backends/megatron_utils/model.py
+@@ -368,6 +368,7 @@
+                 "ref_log_probs",
+                 "values",
+                 "advantages",
++                "metadata",
+                 "returns",
+                 "rollout_log_probs",
+                 "max_seq_lens",
+--- a/slime/ray/rollout.py
++++ b/slime/ray/rollout.py
+@@ -759,6 +759,7 @@
+                 "loss_masks",
+                 "round_number",
+                 "sample_indices",
++                "metadata",
+                 "rollout_log_probs",
+                 "rollout_routed_experts",
+                 "prompt",
+--- a/slime/backends/megatron_utils/data.py
++++ b/slime/backends/megatron_utils/data.py
+@@ -420,5 +420,6 @@
+                 "rollout_routed_experts",
+                 "max_seq_lens",
+                 "dynamic_global_batch_size",
++                "metadata",
+             ]:
+                 continue

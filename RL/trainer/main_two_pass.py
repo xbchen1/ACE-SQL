@@ -1,5 +1,5 @@
 """
-Entry point for Two-Pass GRPO joint training on VERL 0.5.5.
+Entry point for two-pass GRPO joint training on the bundled VERL-compatible runtime.
 """
 
 import os

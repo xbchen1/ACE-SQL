@@ -8,7 +8,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .hydra/
-core.*
+core.[0-9]*
 
 # Local heavyweight assets are intentionally external to git.
 models/*

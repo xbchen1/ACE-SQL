@@ -1,0 +1,5 @@
+benchmark,training_source,normalized_exact_rows,template_exact_rows
+BIRD,SFT-generator,0,0
+BIRD,RL,0,0
+Spider,SFT-generator,2,2
+Spider,RL,0,0

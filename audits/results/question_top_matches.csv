@@ -1,0 +1,42 @@
+benchmark,training_source,benchmark_row,train_row,char_tfidf_similarity,token_jaccard,high_confidence_near,benchmark_question,train_question
+BIRD,SFT-retriever,892,4283,0.6500924487345211,0.13636363636363635,False,State the driver with the most points scored. Find his full name with that points.,"Drivers who scored more points than the average, return their names and total points."
+BIRD,SFT-retriever,1278,6785,0.6384558633278046,0.16129032258064516,False,"Of the patients with an normal level of IGG, how many of them admitted to the hospital?","Could you tell me the names of the hospitals and the number of patients who are currently admitted in each hospital, ordered by the number of admitted patients in descending order?"
+BIRD,SFT-retriever,1406,796,0.5873172315328222,0.14285714285714285,False,"Among the budgets for Food, which one has the highest budgeted amount?","Return the IDs, names, and total budgets of the top 3 LEAs with the highest total budgets."
+BIRD,SFT-retriever,1079,3505,0.5807569049433865,0.10256410256410256,False,Which player is the tallest?,"- A ""unique tallest player"" means that in each game, there was only one player who was the tallest among all players participating in that game.
+- The `ROW_NUMBER()` function is used to rank players by height within each game, with the tallest player receiving a rank of 1.
+How many games had a unique tallest player on the field?"
+BIRD,SFT-retriever,1188,6785,0.5766671625116667,0.1875,False,How many female patients born in 1964 were admitted to the hospital? List them by ID.,"Could you tell me the names of the hospitals and the number of patients who are currently admitted in each hospital, ordered by the number of admitted patients in descending order?"
+BIRD,SFT-generator,1056,5983,0.8522708214359371,0.75,False,What is the name of the football league in the country of Netherlands?,"Netherlands is the name of country;
+What's the name of the football division in the Netherlands?"
+BIRD,SFT-generator,1117,2957,0.7584477920460578,0.3,False,What are the player api id of 10 heaviest players?,"5 heaviest players refer to MAX(weight) limit to 5 playerID;
+Who is the heaviest player? State player ID of 5 heaviest players."
+BIRD,SFT-generator,1079,221,0.7063575826854199,0.3333333333333333,False,Which player is the tallest?,"tallest player refers to MAX(height_in_cm);
+What is the name of the tallest player?"
+BIRD,SFT-generator,1128,2957,0.6794330173299927,0.13636363636363635,False,Which country's players have the heaviest average weights?,"5 heaviest players refer to MAX(weight) limit to 5 playerID;
+Who is the heaviest player? State player ID of 5 heaviest players."
+BIRD,SFT-generator,663,6225,0.6697098510016536,0.4,False,What is the id of the youngest user?,"youngest user refers to MIN(age); female refers to gender = 'F';
+What is the age of the youngest female user of the app?"
+BIRD,RL,732,60,0.6531131576552934,0.23076923076923078,False,Which publisher published the slowest superhero?,What are the names of the publisher that published the most books?
+BIRD,RL,1128,2504,0.6494996692453029,0.16666666666666666,False,Which country's players have the heaviest average weights?,Who has the heaviest weight?
+BIRD,RL,1144,2504,0.6059940514550173,0.35714285714285715,False,Please state the finishing rate and curve score of the player who has the heaviest weight.,Who has the heaviest weight?
+BIRD,RL,1079,2498,0.5807461210422905,0.2727272727272727,False,Which player is the tallest?,What is/are the ids of the tallest patient/s?
+BIRD,RL,1021,516,0.5692396867782926,0.375,False,What is the height of the tallest player? Indicate his name.,"For each draft year, return the year, name, and height of the tallest player."
+Spider,SFT-retriever,430,1346,0.8798976506486079,0.625,False,How many players are there?,How many players are there in the players table?
+Spider,SFT-retriever,548,5840,0.7311131598335209,0.23076923076923078,False,What is the name of the course with the most students enrolled?,"Could you provide a list of courses that have students enrolled, along with the number of students in each course, sorted by the number of students in descending order?"
+Spider,SFT-retriever,546,5840,0.7272180280796887,0.25925925925925924,False,What are the names of all courses that have some students enrolled?,"Could you provide a list of courses that have students enrolled, along with the number of students in each course, sorted by the number of students in descending order?"
+Spider,SFT-retriever,258,289,0.7253731354844966,0.32,False,Which airports do not have departing or arriving flights?,"Which international airports have more than one of the top 3 highest capacity flights, either departing or arriving, and how many such flights do they have?"
+Spider,SFT-retriever,545,5840,0.7229639925142809,0.2857142857142857,False,What are all the course names of the courses which ever have students enrolled in?,"Could you provide a list of courses that have students enrolled, along with the number of students in each course, sorted by the number of students in descending order?"
+Spider,SFT-generator,430,6572,0.8584458551156663,0.625,False,How many players are there?,How many players are there in the players table?
+Spider,SFT-generator,704,1338,0.748736891957465,0.5333333333333333,False,How many countries have a republic as their form of government?,"Socialistic Republic form of government refers to GovernmentForm = 'Socialistic Republic';
+How many countries have Socialistic Republic form of government?"
+Spider,SFT-generator,358,2219,0.7402801036108461,0.1875,False,Count the number of paragraphs.,"number of paragraphs refers to ParagraphNum
+How many number of paragraphs are there in chapter ID 18881?"
+Spider,SFT-generator,755,6865,0.7398109299793526,0.35,False,Which countries have either English or Dutch as an official language?,"English as an official language refers to `Language` = 'English' AND IsOfficial = 'T';
+List any five countries which use English as an official language."
+Spider,SFT-generator,749,6865,0.7345489801894282,0.21739130434782608,False,Give the names of countries with English and French as official languages.,"English as an official language refers to `Language` = 'English' AND IsOfficial = 'T';
+List any five countries which use English as an official language."
+Spider,RL,258,1709,0.7064435244136629,0.32,False,Which airports do not have departing or arriving flights?,"Which international airports have more than one of the top 3 highest capacity flights, either departing or arriving, and how many such flights do they have?"
+Spider,RL,568,2717,0.7058593407429535,0.15384615384615385,False,How many transcripts are listed?,What are the total number of transcripts and the number of those longer transcripts?
+Spider,RL,614,65,0.7048993164313991,0.14814814814814814,False,What are all of the episodes ordered by ratings?,"I want to know if there are more than 5 episodes that are among the top 10 rated episodes, based on their average ratings."
+Spider,RL,405,1505,0.6606103636468216,0.25,False,Show names of teachers and the number of courses they teach.,What is the level of the course with the most number of teachers?
+Spider,RL,400,1505,0.648488638870331,0.3125,False,What is the name of each teacher and what course they teach?,What is the level of the course with the most number of teachers?

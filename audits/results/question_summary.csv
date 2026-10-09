@@ -1,0 +1,7 @@
+benchmark,training_source,normalized_exact,char_tfidf_max,char_ge_0_85,char_ge_0_90,char_ge_0_95,high_confidence_near
+BIRD,SFT-retriever,0,0.6500924487345211,0,0,0,0
+BIRD,SFT-generator,0,0.8522708214359371,1,0,0,0
+BIRD,RL,0,0.6531131576552934,0,0,0,0
+Spider,SFT-retriever,0,0.8798976506486079,1,0,0,0
+Spider,SFT-generator,0,0.8584458551156663,1,0,0,0
+Spider,RL,0,0.7064435244136629,0,0,0,0

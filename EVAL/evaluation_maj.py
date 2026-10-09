@@ -36,7 +36,7 @@ def parse_option():
                         help='Evaluation mode')
     parser.add_argument('--num_cpus', type=int, default=None,
                         help='Number of CPUs for parallel execution (default: all available)')
-    parser.add_argument('--timeout', type=int, default=30,
+    parser.add_argument('--timeout', type=int, default=180,
                         help='Timeout for each SQL execution (seconds)')
     parser.add_argument('--save_pred_sqls', action='store_true',
                         help='Save predicted SQLs to file')
@@ -138,7 +138,7 @@ def execute_callback_execute_sqls(result):
     })
 
 
-def evaluate_sqls_parallel(db_files, questions, pred_sqls, ground_truth_sqls, num_cpus=1, timeout=30):
+def evaluate_sqls_parallel(db_files, questions, pred_sqls, ground_truth_sqls, num_cpus=1, timeout=180):
     """Execute SQL evaluation in parallel."""
     pool = mp.Pool(processes=num_cpus)
     for question_id, db_file, question, pred_sql, ground_truth in zip(
@@ -153,7 +153,7 @@ def evaluate_sqls_parallel(db_files, questions, pred_sqls, ground_truth_sqls, nu
     pool.join()
 
 
-def execute_sqls_parallel(db_files, sqls, num_cpus=1, timeout=30):
+def execute_sqls_parallel(db_files, sqls, num_cpus=1, timeout=180):
     """Execute SQLs in parallel."""
     pool = mp.Pool(processes=num_cpus)
     for data_idx, db_file, sql in zip(range(len(sqls)), db_files, sqls):
@@ -166,7 +166,7 @@ def execute_sqls_parallel(db_files, sqls, num_cpus=1, timeout=30):
     pool.join()
 
 
-def major_voting(db_files, pred_sqls, sampling_num, num_cpus=20, timeout=30, return_random_one_when_all_errors=True):
+def major_voting(db_files, pred_sqls, sampling_num, num_cpus=20, timeout=180, return_random_one_when_all_errors=True):
     """Perform major voting on multiple SQL predictions."""
     global execution_results
     mj_pred_sqls = []
@@ -260,7 +260,7 @@ def print_results(acc_by_diff):
     print("=" * 90)
 
 
-def run_eval(gold_file, pred_file, db_path, mode, save_pred_sqls, num_cpus=20, timeout=30):
+def run_eval(gold_file, pred_file, db_path, mode, save_pred_sqls, num_cpus=20, timeout=180):
     """Run evaluation based on mode."""
     global evaluation_results
 

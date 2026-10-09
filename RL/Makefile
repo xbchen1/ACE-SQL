@@ -1,8 +1,12 @@
-.PHONY: check-paths syntax
-
-check-paths:
-	@bash scripts/check_paths.sh
+PYTHON ?= python3
+.PHONY: syntax test check-paths
 
 syntax:
-	@bash -n scripts/train_rl_pcgrad.sh
-	@python3 -m py_compile trainer/main_two_pass.py trainer/two_pass_ray_trainer.py rewards/joint_reward.py rewards/verl_reward_wrapper.py utils/path_utils.py
+	@for script in scripts/*.sh; do bash -n "$$script" || exit; done
+	@"$(PYTHON)" -m compileall -q ace_sql_slime rewards scripts utils trainer tests
+
+test:
+	@PYTHONPATH=. "$(PYTHON)" -m unittest discover -s tests -p 'test_slime_*.py'
+
+check-paths:
+	@"$(PYTHON)" ../scripts/verify_release.py

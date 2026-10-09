@@ -51,5 +51,7 @@ For Spider robustness, `prepare-data` can download Spider-DK, Spider-Syn, and Sp
 
 - The scripts are plain Bash wrappers, not cluster-specific job scripts. Submit them with your own scheduler wrapper if needed.
 - Evaluation defaults use greedy decoding: `NUM_SAMPLES=1` and `TEMPERATURE=0.0`.
+- For the shared-policy model, point `MODEL_PATH` and `SQL_MODEL` to the same HF-exported checkpoint.
+- BIRD evaluation uses benchmark set-based execution matching and a 180-second timeout (override with `SQL_EVAL_TIMEOUT`). Training uses ordered comparison with a 30-second timeout.
 - Default paths are relative placeholders under this package. Use environment variables for real datasets and models.
 - `omnisql_eval/test_suite_sql_eval/` contains only the evaluator code; it does not include test-suite databases.

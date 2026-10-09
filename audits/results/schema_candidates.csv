@@ -1,0 +1,2 @@
+benchmark,training_source,benchmark_db_id,best_jaccard,training_rows,matched_training_row_count,training_db_ids,catalog_column_count,benchmark_db_question_count,exact_structural_schema,benchmark_only_columns,training_only_columns
+Spider,RL-full,world_1,1.0,"[161, 281, 1130, 1205, 1640, 1794, 2214]",7,['world'],24,120,False,[],[]

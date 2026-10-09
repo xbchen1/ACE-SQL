@@ -163,12 +163,10 @@ def select_columns_from_list(db_info: Dict, column_list: List[str], strict_match
 
         matched = False
 
+        # 只匹配 table.column 格式，与 RL 侧语义保持一致；纯表名无效。
         # 第一步：精确匹配
         if item_lower in column_map:
             selected_indices.add(column_map[item_lower])
-            matched = True
-        elif item_lower in table_map:
-            selected_indices.update(table_map[item_lower])
             matched = True
         else:
             # 第二步：去除标点符号后的二次匹配
@@ -178,11 +176,6 @@ def select_columns_from_list(db_info: Dict, column_list: List[str], strict_match
                 # 找到匹配，还原回原始schema格式
                 original_key = normalized_column_map[normalized_item]
                 selected_indices.add(column_map[original_key])
-                matched = True
-            elif normalized_item in normalized_table_map:
-                # 表名匹配
-                original_table = normalized_table_map[normalized_item]
-                selected_indices.update(table_map[original_table])
                 matched = True
             else:
                 # 仅在非严格模式下尝试部分匹配

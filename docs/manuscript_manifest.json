@@ -1,0 +1,10 @@
+{
+  "revision": "ARR October 2026, 2026-10-09",
+  "method_version": "arr-20261009-union-updated-pool",
+  "sources": {
+    "paper_v3.tex": "e70e3071dfb2e16d6742cdbea491196603a0c3da6f9f7b83725e987381154802",
+    "paper_v3.pdf": "de42762a0550d8a6329f37b70e78bdee191d5186b725d378ab99c19d5bc71ccf",
+    "figures/ace_sql_overview_v2.pdf": "c31ec842bd61045204f01e90e924633cdc7ad95217dc2a18bcb877f65dfd76d4"
+  },
+  "results_provenance": "Manuscript-reported; no new model training or benchmark evaluation in this repository update."
+}

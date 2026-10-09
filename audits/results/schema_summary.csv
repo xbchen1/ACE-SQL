@@ -1,0 +1,7 @@
+benchmark,training_source,exact_column_catalog_dbs,near_column_catalog_dbs_ge_0_85,near_column_catalog_dbs_ge_0_95,exact_structural_schema_dbs
+BIRD,SFT-retriever-full,0,0,0,
+BIRD,SFT-generator-prompt,0,0,0,
+BIRD,RL-full,0,0,0,0.0
+Spider,SFT-retriever-full,0,0,0,
+Spider,SFT-generator-prompt,0,0,0,
+Spider,RL-full,1,1,1,0.0

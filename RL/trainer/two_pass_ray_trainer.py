@@ -1,7 +1,7 @@
 """
 Two-Pass GRPO Ray Trainer for joint Retriever + Generator training.
 
-This trainer subclasses VERL 0.5.5 RayPPOTrainer and overrides fit() to run:
+This trainer subclasses the bundled VERL-compatible RayPPOTrainer and overrides fit() to run:
 1. Retriever rollout
 2. Build generator prompts from retriever output
 3. Generator rollout
@@ -502,7 +502,7 @@ class TwoPassGRPOTrainer(RayPPOTrainer):
         return validate_training_rollout(self)
 
     def _prepare_rollout_batch(self, batch: DataProto) -> DataProto:
-        """Prepare generation input in the same style as VERL 0.5.5 fit()."""
+        """Prepare generation input in the same style as the bundled VERL fit()."""
         batch_keys_to_pop = [
             k for k in ["input_ids", "attention_mask", "position_ids"] if k in batch.batch.keys()
         ]
@@ -1629,7 +1629,7 @@ class TwoPassGRPOTrainer(RayPPOTrainer):
         )
 
     def fit(self):
-        """Two-pass GRPO training loop for VERL 0.5.5."""
+        """Two-pass GRPO training loop for the bundled VERL-compatible runtime."""
         from omegaconf import OmegaConf
         from verl.utils.tracking import Tracking
 
